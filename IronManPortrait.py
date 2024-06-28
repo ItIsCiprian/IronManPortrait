@@ -4,6 +4,8 @@ import turtle as t
 WINDOW_WIDTH, WINDOW_HEIGHT = 800, 600
 BACKGROUND_COLOR = "black"
 PEN_SIZE = 2
+
+# Setup the turtle window
 t.setup(WINDOW_WIDTH, WINDOW_HEIGHT)
 t.bgcolor(BACKGROUND_COLOR)
 t.title("Iron Man Face")
@@ -52,8 +54,9 @@ def main():
     draw_face_outline()
     draw_eyes()
     draw_arc_reactor()
-    pen.hideturtle()
-    t.mainloop()
+    pen.hideturtle()  # Hide the turtle cursor after drawing is complete
+    t.mainloop()  # Keeps the window open
 
+# Entry point for the script
 if __name__ == "__main__":
     main()
