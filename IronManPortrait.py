@@ -1,74 +1,90 @@
 import turtle as t
+from dataclasses import dataclass
+from typing import Tuple
+
+@dataclass
+class Colors:
+    """Color constants for the Iron Man face"""
+    BACKGROUND: str = "black"
+    FACE: str = "red"
+    EYE: str = "white"
+    ARC_REACTOR: str = "blue"
+
+@dataclass
+class Config:
+    """Configuration settings for the drawing"""
+    WINDOW_SIZE: Tuple[int, int] = (800, 600)
+    PEN_SIZE: int = 2
+    DRAWING_SPEED: int = 0  # Fastest speed
 
 class IronManFaceDrawer:
-    # Configuration constants
-    WINDOW_WIDTH, WINDOW_HEIGHT = 800, 600
-    BACKGROUND_COLOR = "black"
-    PEN_SIZE = 2
-    
-    # Color definitions
-    FACE_COLOR = "red"
-    EYE_COLOR = "white"
-    ARC_REACTOR_COLOR = "blue"
-    
     def __init__(self):
-        """Initialize the drawing environment and turtle."""
-        # Setup the turtle window
-        t.setup(self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
-        t.bgcolor(self.BACKGROUND_COLOR)
-        t.title("Iron Man Face")
-        
-        # Create and configure the turtle
-        self.pen = t.Turtle()
-        self.pen.speed(0)  # Fastest drawing speed
-        self.pen.pensize(self.PEN_SIZE)
+        """Initialize the drawing environment with optimized settings"""
+        self._setup_screen()
+        self._setup_turtle()
     
-    def draw_filled_circle(self, color, radius, x, y):
-        """Draws a filled circle with the given color, radius, and center position offset."""
-        self.pen.penup()
+    def _setup_screen(self) -> None:
+        """Configure the drawing screen with optimal settings"""
+        screen = t.Screen()
+        screen.setup(*Config.WINDOW_SIZE)
+        screen.bgcolor(Colors.BACKGROUND)
+        screen.title("Iron Man Face")
+        # Enable fastest drawing mode
+        screen.tracer(0)
+    
+    def _setup_turtle(self) -> None:
+        """Configure the turtle with optimal settings"""
+        self.pen = t.Turtle()
+        self.pen.hideturtle()  # Hide turtle immediately for better performance
+        self.pen.speed(Config.DRAWING_SPEED)
+        self.pen.pensize(Config.PEN_SIZE)
+    
+    def _draw_filled_circle(self, color: str, radius: float, x: float, y: float) -> None:
+        """Optimized method to draw a filled circle"""
+        self.pen.up()
         self.pen.goto(x, y - radius)
-        self.pen.pendown()
+        self.pen.down()
         self.pen.fillcolor(color)
         self.pen.begin_fill()
-        self.pen.circle(radius)
+        # Use more efficient circle drawing
+        self.pen.circle(radius, steps=36)  # Optimize steps for smoother circles
         self.pen.end_fill()
     
-    def draw_eyes(self):
-        """Draws the eyes and reflections for the Iron Man face."""
-        # Main eyes
-        self.draw_filled_circle(self.EYE_COLOR, 60, -40, 60)
-        self.draw_filled_circle(self.EYE_COLOR, 60, 40, 60)
+    def draw_face(self) -> None:
+        """Draw the complete Iron Man face with optimized ordering"""
+        # Draw larger elements first
+        self._draw_filled_circle(Colors.FACE, 100, 0, 0)  # Face outline
         
-        # Eye reflections
-        self.draw_filled_circle(self.EYE_COLOR, 25, -37, 75)
-        self.draw_filled_circle(self.EYE_COLOR, 25, 37, 75)
+        # Draw eyes
+        for x in (-40, 40):
+            self._draw_filled_circle(Colors.EYE, 60, x, 60)  # Main eyes
+        
+        # Draw eye reflections
+        for x in (-37, 37):
+            self._draw_filled_circle(Colors.EYE, 25, x, 75)
+        
+        # Draw arc reactor components
+        self._draw_filled_circle(Colors.ARC_REACTOR, 15, 0, -35)  # Center
+        for x in (-15, 15):
+            self._draw_filled_circle(Colors.ARC_REACTOR, 5, x, -35)  # Side pieces
+        
+        # Update screen once at the end
+        t.update()
     
-    def draw_arc_reactor(self):
-        """Draws the arc reactor on the Iron Man face."""
-        self.draw_filled_circle(self.ARC_REACTOR_COLOR, 15, 0, -35)
-        self.draw_filled_circle(self.ARC_REACTOR_COLOR, 5, -15, -35)
-        self.draw_filled_circle(self.ARC_REACTOR_COLOR, 5, 15, -35)
-    
-    def draw_face_outline(self):
-        """Draws the main face outline for Iron Man."""
-        self.draw_filled_circle(self.FACE_COLOR, 100, 0, 0)
-    
-    def draw(self):
-        """Main function to orchestrate the drawing steps."""
-        self.draw_face_outline()
-        self.draw_eyes()
-        self.draw_arc_reactor()
-        self.pen.hideturtle()  # Hide the turtle cursor after drawing is complete
-    
-    def display(self):
-        """Keeps the window open until closed."""
-        t.mainloop()
+    def display(self) -> None:
+        """Display the completed drawing"""
+        t.done()
 
-def main():
-    """Entry point for the script."""
-    drawer = IronManFaceDrawer()
-    drawer.draw()
-    drawer.display()
+def main() -> None:
+    """Entry point with error handling"""
+    try:
+        drawer = IronManFaceDrawer()
+        drawer.draw_face()
+        drawer.display()
+    except (turtle.Terminator, KeyboardInterrupt):
+        print("\nDrawing terminated by user")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
     main()
