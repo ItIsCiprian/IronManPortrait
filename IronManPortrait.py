@@ -1,6 +1,6 @@
-dddimport turtle as t
+import turtle as t
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Tuple, List
 
 
 @dataclass
@@ -40,18 +40,22 @@ class IronManFaceDrawer:
         """Initialize the drawing environment and turtle."""
         self._setup_window()
         self.pen = self._create_pen()
+        # Enable batch drawing for better performance
+        t.tracer(0)
     
     def _setup_window(self) -> None:
         """Configure the turtle window."""
-        t.setup(self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
-        t.bgcolor(self.BACKGROUND_COLOR)
-        t.title(self.WINDOW_TITLE)
+        screen = t.Screen()
+        screen.setup(self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
+        screen.bgcolor(self.BACKGROUND_COLOR)
+        screen.title(self.WINDOW_TITLE)
     
     def _create_pen(self) -> t.Turtle:
         """Create and configure the turtle pen."""
         pen = t.Turtle()
         pen.speed(self.DRAW_SPEED)
         pen.pensize(self.PEN_SIZE)
+        pen.hideturtle()  # Hide turtle for better performance
         return pen
     
     def _draw_circle(self, circle: Circle) -> None:
@@ -61,10 +65,10 @@ class IronManFaceDrawer:
         self.pen.pendown()
         self.pen.fillcolor(circle.color)
         self.pen.begin_fill()
-        self.pen.circle(circle.radius)
+        self.pen.circle(circle.radius, steps=36)  # Optimize circle smoothness
         self.pen.end_fill()
     
-    def _get_face_components(self) -> list[Circle]:
+    def _get_face_components(self) -> List[Circle]:
         """Define all circles that compose the Iron Man face."""
         return [
             # Face outline
@@ -88,18 +92,23 @@ class IronManFaceDrawer:
         """Draw the complete Iron Man face."""
         for circle in self._get_face_components():
             self._draw_circle(circle)
-        self.pen.hideturtle()
+        t.update()  # Update screen once after all drawing is complete
     
     def display(self) -> None:
         """Keep the window open until closed by user."""
-        t.mainloop()
+        t.done()
 
 
 def main() -> None:
     """Entry point for the script."""
-    drawer = IronManFaceDrawer()
-    drawer.draw()
-    drawer.display()
+    try:
+        drawer = IronManFaceDrawer()
+        drawer.draw()
+        drawer.display()
+    except (t.Terminator, KeyboardInterrupt):
+        print("\nDrawing terminated by user")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 
 if __name__ == "__main__":
